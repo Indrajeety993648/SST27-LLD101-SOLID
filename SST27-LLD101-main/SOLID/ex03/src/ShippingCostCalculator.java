@@ -1,8 +1,26 @@
+import java.util.*;
+
 public class ShippingCostCalculator {
-    double cost(Shipment s){
-        if ("STANDARD".equals(s.type)) return 50 + 5*s.weightKg;
-        if ("EXPRESS".equals(s.type))  return 80 + 8*s.weightKg;
-        if ("OVERNIGHT".equals(s.type))return 120 + 10*s.weightKg;
+    private final List<ShippingCostStrategy> strategies;
+
+    public ShippingCostCalculator(List<ShippingCostStrategy> strategies) {
+        this.strategies = strategies;
+    }
+
+    public double cost(Shipment s) {
+        for (ShippingCostStrategy strategy : strategies) {
+            if (strategy.supports(s.type)) {
+                return strategy.calculate(s.weightKg);
+            }
+        }
         throw new IllegalArgumentException("Unknown type: " + s.type);
+    }
+
+    // Convenience constructor for default strategies
+    public ShippingCostCalculator() {
+        this(Arrays.asList(
+                new StandardShippingCost(),
+                new ExpressShippingCost(),
+                new OvernightShippingCost()));
     }
 }
